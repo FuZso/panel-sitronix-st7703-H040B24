@@ -1,0 +1,49 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2712";
+
+    fragment@0 {
+        target = <&i2c0>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target = <&gpio>;
+        __overlay__ {
+            gt911_pins: gt911_pins {
+                brcm,pins = <25 24>;
+                brcm,function = <0 0>;    /* 0 = INPUT */
+                brcm,pull = <2 2>;        /* 2 = PULL_UP */
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&i2c0>;
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells    = <0>;
+
+            /* gt911 Touchcontroller */
+            gt911: gt911@5d {
+                compatible = "goodix,gt911";
+                reg = <0x5d>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&gt911_pins>;
+
+                interrupt-parent = <&gpio>;
+                interrupts = <27 0x2>;      /* BCM GPIO 27, IRQ_TYPE_EDGE_FALLING (0x2) */
+                reset-gpios = <&gpio 22 1>; /* BCM GPIO 22, active-low */
+
+                touchscreen-size-x = <720>;
+                touchscreen-size-y = <720>;
+                touchscreen-inverted-x;
+                touchscreen-inverted-y;
+            };
+        };
+    };
+};
